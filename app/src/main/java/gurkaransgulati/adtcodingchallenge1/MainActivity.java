@@ -113,7 +113,7 @@ public class MainActivity extends Activity {
 
         String stringJsonResponse = null;
         try {
-            stringJsonResponse = new AsyncTaskAPIGetData().execute().get().toString().replace("\\","/");
+            stringJsonResponse = new AsyncTaskAPIGetData().execute().get().toString().replace("\\","");
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
@@ -126,7 +126,7 @@ public class MainActivity extends Activity {
 //        JsonObject jsonObjectResponse = jsonElementResponse.getAsJsonObject();
 
         System.out.println(stringJsonResponse);
-        stringJsonResponse = "{'a':'b','c':'d'}";
+//        stringJsonResponse = "{'a':'b','c':'d'}";
         System.out.println(stringJsonResponse);
         JsonParser jsonParser = new JsonParser();
         JsonObject jsonObjectResponse = jsonParser.parse(stringJsonResponse).getAsJsonObject();

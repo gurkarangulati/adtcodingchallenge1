@@ -3,6 +3,7 @@ package gurkaransgulati.adtcodingchallenge1;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -12,6 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by gurkarangulati on 7/28/15.
@@ -28,57 +31,44 @@ public class AsyncTaskAPIGetData extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         String url_string = "http://api.nytimes.com/svc/topstories/v1/home.json?api-key=15629235341919a7b4b8b6e9344f9bca:6:72095783";
-        try {
-            url = new URL(url_string);
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
-        if (url != null){
-            InputStream is = null;
-            // Only display the first 500 characters of the retrieved
-            // web page content.
-            int len = 500;
-            HttpURLConnection conn = null;
+        HttpURLConnection c = null;
             try {
-                conn = (HttpURLConnection) url.openConnection();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            conn.setReadTimeout(10000 /* milliseconds */);
-            conn.setConnectTimeout(15000 /* milliseconds */);
-            try {
-                conn.setRequestMethod("GET");
-            } catch (ProtocolException e) {
-                e.printStackTrace();
-            }
-            conn.setDoInput(true);
-            // Starts the query
-            try {
-                conn.connect();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            int response = 0;
-            try {
-                response = conn.getResponseCode();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            System.out.println( "The response is: " + response);
-            try {
-                is = conn.getInputStream();
-            } catch (IOException e) {
-                e.printStackTrace();
+                URL u = new URL(url_string);
+                c = (HttpURLConnection) u.openConnection();
+                c.setRequestMethod("GET");
+                c.setRequestProperty("Content-length", "0");
+                c.setUseCaches(false);
+                c.setAllowUserInteraction(false);
+                c.connect();
+                int status = c.getResponseCode();
+
+                switch (status) {
+                    case 200:
+                    case 201:
+                        BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream()));
+                        StringBuilder sb = new StringBuilder();
+                        String line;
+                        while ((line = br.readLine()) != null) {
+                            sb.append(line+"\n");
+                        }
+                        br.close();
+                        asyncResponse = sb.toString();
+                }
+
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            } finally {
+                if (c != null) {
+                    try {
+                        c.disconnect();
+                    } catch (Exception ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
 
-            // Convert the InputStream into a string
-            try {
-                asyncResponse = readIt(is, len);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println("asyncResponse : " + asyncResponse);
         return asyncResponse;
     }
 
